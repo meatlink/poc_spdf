@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: spdk
+  name: spdk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spdk
+  template:
+    metadata:
+      labels:
+        app: spdk
+    spec:
+      containers:
+      - image: spdk:v1
+        imagePullPolicy: IfNotPresent
+        name: spdk
+        securityContext:
+          privileged: true
+        env:
+        - name: SPDK_HUGEPAGES_MB
+          value: "{{ .Values.spdk_hugepages_mb }}"
+        resources:
+          limits:
+            hugepages-2Mi: "{{ .Values.spdk_hugepages_mb }}Mi"
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /dev/hugepages
+          name: hugepages
+      restartPolicy: Always
+      volumes:
+      - name: hugepages
+        emptyDir:
+          medium: HugePages-2Mi
